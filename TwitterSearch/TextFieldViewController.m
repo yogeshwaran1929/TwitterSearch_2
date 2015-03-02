@@ -28,8 +28,13 @@
     NSString* screenNameString = [markArray objectAtIndex: 1];
     NSString* userImageURL = [markArray objectAtIndex: 2];
 
+    
+    /// Static for iphone simulator
+    
     passingLatitude = 13.024492;
     passingLongitude = 80.215529;
+    
+    
     
     /// User Location
     
@@ -60,6 +65,7 @@
     
     
     //// Using GCD Method load Image Asyn Mode
+    
     dispatch_async(dispatch_get_global_queue(0,0), ^{
         
         NSData * data = [[NSData alloc] initWithContentsOfURL: [NSURL URLWithString:[NSString stringWithFormat:@"%@",userImageURL]]];
@@ -144,10 +150,12 @@
     // Do any additional setup after loading the view.
 }
 
+#pragma mark SearchAction
+
 -(void)searchButtonAction
 {
     
-    NSString *locationString = [NSString stringWithFormat:@"%f,%f,1km",passingLatitude,passingLongitude];
+    NSString *locationString = [NSString stringWithFormat:@"%f,%f,3km",passingLatitude,passingLongitude];
     UITextField *searchTextField = (UITextField*)[self.view viewWithTag:100];
     
     if([searchTextField.text length] != 0)
