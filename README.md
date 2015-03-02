@@ -8,7 +8,7 @@
    * Xcode version 5.0 or later.
    * Twitter Account.
 
-<h1>Compile and Run:<h1>
+<h1>Compile and Run:</h1>
 
    * Open the file with extension .xcodeproj
    * The project will be opened in Xcode.
