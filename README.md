@@ -4,7 +4,7 @@
    
 <h1>prerequisites</h1>
 
-   * MAC with OSx Maverick or later.
+   * MAC with OSx mavericks or later.
    * Xcode version 5.0 or later.
    * Twitter Account.
 
