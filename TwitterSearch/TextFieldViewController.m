@@ -150,10 +150,18 @@
     NSString *locationString = [NSString stringWithFormat:@"%f,%f,1km",passingLatitude,passingLongitude];
     UITextField *searchTextField = (UITextField*)[self.view viewWithTag:100];
     
-    ListViewController *listVC = [[ListViewController alloc]init];
-    listVC.textfieldString = searchTextField.text;
-    listVC.passLoation = locationString;
-    [self.navigationController pushViewController:listVC animated:YES];
+    if([searchTextField.text length] != 0)
+    {
+        ListViewController *listVC = [[ListViewController alloc]init];
+        listVC.textfieldString = searchTextField.text;
+        listVC.passLoation = locationString;
+        [self.navigationController pushViewController:listVC animated:YES];
+    }
+    else
+    {
+        UIAlertView* successAlert =[[UIAlertView alloc]initWithTitle:@"Alert" message:@"Please Enter Search Result" delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
+        [successAlert show];
+    }
 
 }
 
