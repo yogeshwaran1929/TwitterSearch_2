@@ -2,11 +2,14 @@
 //  AppDelegate.m
 //  TwitterSearch
 //
-//  Created by Panamon-Mac1 on 02/03/15.
+//  Created by Yogi on 02/03/15.
 //  Copyright (c) 2015 Yogesh Tech. All rights reserved.
 //
 
 #import "AppDelegate.h"
+#import "LoginViewController.h"
+#import <Fabric/Fabric.h>
+#import <TwitterKit/TwitterKit.h>
 
 @interface AppDelegate ()
 
@@ -17,6 +20,13 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    [Fabric with:@[TwitterKit]];
+    
+    LoginViewController *loginVC = [[LoginViewController alloc]init];
+    UINavigationController  *navigation = [[UINavigationController alloc]initWithRootViewController:loginVC];
+    self.window.rootViewController = navigation;
+     [self.window makeKeyAndVisible];
     return YES;
 }
 
