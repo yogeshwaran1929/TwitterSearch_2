@@ -39,10 +39,10 @@
     
     resultArray = [[NSMutableArray alloc]initWithCapacity:0];
     
-    resultTableView = [[UITableView alloc]initWithFrame:CGRectMake(0, headerLabel.frame.origin.y+headerLabel.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-64) style:UITableViewStylePlain];
+    resultTableView = [[UITableView alloc]initWithFrame:CGRectMake(0, headerLabel.frame.origin.y+headerLabel.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-64)];
     resultTableView.backgroundColor = [UIColor whiteColor];
-    resultTableView.delegate = self;
-    resultTableView.dataSource  =self;
+    self.resultTableView.separatorColor = [UIColor clearColor];
+
     [self.view addSubview:resultTableView];
     
     [self loadQuery];
@@ -55,13 +55,12 @@
 - (void)loadQuery
 {
 
+    NSString *passTextFiled = [NSString stringWithFormat:@"#%@ filter:images",textfieldString];
+    
     NSString *statusesShowEndpoint = @"https://api.twitter.com/1.1/search/tweets.json";
     
-    NSDictionary *params = @{@"q" : textfieldString,@"geocode" : passLoation,@"result_type":@"mixed",@"count":@"50"};
+    NSDictionary *params = @{@"q" : passTextFiled,@"geocode" :passLoation,@"count":@"100",@"include_entities":@"true"};
 
-    
-    //q=Chennai&geocode=13.0405026%2C80.2336924%2C1km&result_type=mixed";
- 
     NSError *clientError;
     NSURLRequest *request = [[[Twitter sharedInstance] APIClient]
                              URLRequestWithMethod:@"GET"
@@ -83,27 +82,56 @@
                                        options:0
                                              error:&jsonError];
                  
-                 NSArray *result1 = jsonResult[@"statuses"];
-                 
+                 NSArray *result1 = jsonResult[@"statuses"] ;
+                 NSMutableArray *secArray = [NSMutableArray array];
                  
                  if ([result1 count] != 0)
                  {
+                     
+                     for(NSDictionary *finalDict in result1)
+                     {
+                         [secArray  addObject: [finalDict valueForKey:@"entities"]];
+                     
+                     }
+                     
+                 }
+
+                 if ([secArray count] != 0)
+                 {
                      [resultArray removeAllObjects];
 
-                     for(NSDictionary *dict in result1)
+                     for(NSDictionary *dict in secArray)
                      {
-                        
-                         NSString *name = [[dict valueForKey:@"user"]  valueForKey:@"name"];
-                         NSString *location = [[dict valueForKey:@"place"] valueForKey:@"name"];
-                         NSString *imageURL =[[dict valueForKey:@"user"] valueForKey:@"profile_image_url"];
-                         NSString *fullString = [NSString stringWithFormat:@"%@^%@^%@",name,location, imageURL];
-                         [resultArray addObject:fullString];
                          
-                        [resultTableView reloadData];
+                        NSString *imageURL = [NSString stringWithFormat:@"%@", [[dict valueForKey:@"media"] valueForKey:@"media_url"]];
+                         NSString * removeChara1 = [imageURL stringByReplacingOccurrencesOfString: @"(" withString: @""];
+                         NSString * removeChara2 = [removeChara1 stringByReplacingOccurrencesOfString: @")" withString: @""];
+                         NSString * removeChara3 = [removeChara2 stringByReplacingOccurrencesOfString: @"\"" withString: @""];
+                         NSString *finalResult = [removeChara3 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                         
 
-                     }
-                 
-                 }
+                         if(![finalResult isEqualToString:@"null"])
+                         {
+                              [resultArray addObject:finalResult];
+                         }
+                        
+                         
+                    }
+                     
+                         if([resultArray count] != 0)
+                         {
+                             resultTableView.delegate = self;
+                             resultTableView.dataSource  =self;
+                             [resultTableView reloadData];
+                         }
+                         else
+                         {
+                             UIAlertView* successAlert =[[UIAlertView alloc]initWithTitle:@"Alert" message:@"No results found" delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
+                             [successAlert show];
+                         }
+
+                     
+                    }
                  else
                   {
                       UIAlertView* successAlert =[[UIAlertView alloc]initWithTitle:@"Alert" message:@"No results found" delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
@@ -169,50 +197,34 @@
         [subView removeFromSuperview];
     }
     
-    NSString *reString = [resultArray objectAtIndex:indexPath.row];
-    NSArray *reArray = [reString componentsSeparatedByString:@"^"];
-    
-    UIView *newsCellView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, resultTableView.frame.size.width, 80)];
+
+    UIView *newsCellView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, resultTableView.frame.size.width, 150)];
     newsCellView.backgroundColor = [UIColor whiteColor];
-    [cell.contentView addSubview:newsCellView];
-    
-    UIImageView *imgView = [[UIImageView alloc]initWithFrame:CGRectMake(5, (newsCellView.frame.size.height-75)/2, 75, 75)];
-//    imgView.image= [UIImage imageNamed:[reArray objectAtIndex:2]];
    
     
-    UILabel *titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(imgView.frame.size.width+imgView.frame.origin.x+5, 10, 230, 35)];
-    titleLabel.text = [reArray objectAtIndex:0];
-    titleLabel.numberOfLines = 10;
-    titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
-    titleLabel.textColor = [UIColor blackColor];
-    [newsCellView addSubview:titleLabel];
-
+    UIImageView *imgView = [[UIImageView alloc]initWithFrame:CGRectMake(5, 0, newsCellView.frame.size.width-10, 148)];
     
-    UILabel *locationLabel = [[UILabel alloc]initWithFrame:CGRectMake(imgView.frame.size.width+imgView.frame.origin.x+5, 40, 230, 35)];
-    locationLabel.text = [reArray objectAtIndex:1];
-    locationLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
-    locationLabel.textColor = [UIColor blackColor];
-    [newsCellView addSubview:locationLabel];
-    
-    
-    NSString *str = [NSString stringWithFormat:@"%@",[reArray objectAtIndex:2]];
+    NSString *strResult1 = [NSString stringWithFormat:@"%@",[resultArray objectAtIndex:indexPath.row]];
 
     dispatch_async(kBgQueue, ^{
         
-        NSData *imgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:str]];
-        
+       NSData *imgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:strResult1]];
+     
         dispatch_async(dispatch_get_main_queue(), ^{
             imgView.image = [UIImage imageWithData:imgData];
+             [newsCellView addSubview:imgView];
         });
+       
     });
-    [newsCellView addSubview:imgView];
+    
+    [cell.contentView addSubview:newsCellView];
     
     
-    UILabel *lineLabel = [[UILabel alloc]initWithFrame:CGRectMake(0,78,resultTableView.frame.size.width,1)];
+    UILabel *lineLabel = [[UILabel alloc]initWithFrame:CGRectMake(0,148,resultTableView.frame.size.width,1)];
     lineLabel.backgroundColor = [UIColor colorWithRed:174.0/255 green:174.0/255 blue:175.0/255 alpha:1];
     [newsCellView addSubview:lineLabel];
     
-    UILabel *lineLabel1 = [[UILabel alloc]initWithFrame:CGRectMake(0,79,resultTableView.frame.size.width,1)];
+    UILabel *lineLabel1 = [[UILabel alloc]initWithFrame:CGRectMake(0,149,resultTableView.frame.size.width,1)];
     lineLabel1.backgroundColor =[UIColor colorWithRed:220.0/255 green:222.0/255 blue:217.0/255 alpha:1];
     [newsCellView addSubview:lineLabel1];
 
@@ -222,9 +234,15 @@
     
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+    // This will create a "invisible" footer
+    return 0.01f;
+}
+
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-     return 80;
+     return 150;
 }
 
 - (void)didReceiveMemoryWarning {
