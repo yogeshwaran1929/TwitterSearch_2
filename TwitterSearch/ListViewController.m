@@ -55,9 +55,15 @@
 - (void)loadQuery
 {
 
+     ////  Search Query images tag with hashtag name
+    
     NSString *passTextFiled = [NSString stringWithFormat:@"#%@ filter:images",textfieldString];
     
+    /// Twitter Search API
+    
     NSString *statusesShowEndpoint = @"https://api.twitter.com/1.1/search/tweets.json";
+    
+    // Parameters (hashtag , geocode , count , include_entities)
     
     NSDictionary *params = @{@"q" : passTextFiled,@"geocode" :passLoation,@"count":@"100",@"include_entities":@"true"};
 
@@ -69,55 +75,38 @@
                              error:&clientError];
     
     if (request) {
-        [[[Twitter sharedInstance] APIClient]
-         sendTwitterRequest:request
-         completion:^(NSURLResponse *response,
-                      NSData *data,
-                      NSError *connectionError) {
-             if (data) {
+        [[[Twitter sharedInstance] APIClient]  sendTwitterRequest:request completion:^(NSURLResponse *response, NSData *data,   NSError *connectionError) {
+             if (data)
+             {
                  // handle the response data e.g.
                  NSError *jsonError;
-                 NSDictionary *jsonResult = [NSJSONSerialization
-                                       JSONObjectWithData:data
-                                       options:0
-                                             error:&jsonError];
+                 NSDictionary *jsonResult = [NSJSONSerialization  JSONObjectWithData:data  options:0  error:&jsonError];
+                 NSArray *resultStatus = jsonResult[@"statuses"] ;
+                 NSMutableArray *entitesArray = [NSMutableArray array];
                  
-                 NSArray *result1 = jsonResult[@"statuses"] ;
-                 NSMutableArray *secArray = [NSMutableArray array];
-                 
-                 if ([result1 count] != 0)
+                 if ([resultStatus count] != 0)
                  {
-                     
-                     for(NSDictionary *finalDict in result1)
+                     for(NSDictionary *finalDict in resultStatus)
                      {
-                         [secArray  addObject: [finalDict valueForKey:@"entities"]];
-                     
+                         [entitesArray  addObject: [finalDict valueForKey:@"entities"]];
                      }
-                     
                  }
-
-                 if ([secArray count] != 0)
+                 if ([entitesArray count] != 0)
                  {
                      [resultArray removeAllObjects];
-
-                     for(NSDictionary *dict in secArray)
+                     for(NSDictionary *dict in entitesArray)
                      {
-                         
                         NSString *imageURL = [NSString stringWithFormat:@"%@", [[dict valueForKey:@"media"] valueForKey:@"media_url"]];
                          NSString * removeChara1 = [imageURL stringByReplacingOccurrencesOfString: @"(" withString: @""];
                          NSString * removeChara2 = [removeChara1 stringByReplacingOccurrencesOfString: @")" withString: @""];
                          NSString * removeChara3 = [removeChara2 stringByReplacingOccurrencesOfString: @"\"" withString: @""];
                          NSString *finalResult = [removeChara3 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                         
-
+            
                          if(![finalResult isEqualToString:@"null"])
                          {
                               [resultArray addObject:finalResult];
                          }
-                        
-                         
                     }
-                     
                          if([resultArray count] != 0)
                          {
                              resultTableView.delegate = self;
@@ -129,8 +118,6 @@
                              UIAlertView* successAlert =[[UIAlertView alloc]initWithTitle:@"Alert" message:@"No results found" delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
                              [successAlert show];
                          }
-
-                     
                     }
                  else
                   {
@@ -138,8 +125,6 @@
                       [successAlert show];
 
                   }
-
-              
              }
              else
              {
@@ -156,8 +141,7 @@
         [errorAlert1 show];
         
     }
-    
-    
+
 }
 
 #pragma mark - Back 
@@ -228,8 +212,6 @@
     lineLabel1.backgroundColor =[UIColor colorWithRed:220.0/255 green:222.0/255 blue:217.0/255 alpha:1];
     [newsCellView addSubview:lineLabel1];
 
-    
-    
     return cell;
     
 }
