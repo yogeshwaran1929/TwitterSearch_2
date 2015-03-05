@@ -8,15 +8,19 @@
 
 #import <UIKit/UIKit.h>
 #import <TwitterKit/TwitterKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-@interface ListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
+
+@interface ListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,CLLocationManagerDelegate>
 {
-    
+    CLLocationManager *locationManager ;
 }
 
 @property(nonatomic,retain) NSString *searchDetails;
 @property(nonatomic,strong)UITableView *resultTableView;
 @property (nonatomic, retain) NSMutableArray *resultArray;
 @property(nonatomic,strong) NSString *textfieldString,*passLoation;
+@property(nonatomic,assign) float passingLatitude;
+@property (nonatomic,assign) float passingLongitude;
 
 @end

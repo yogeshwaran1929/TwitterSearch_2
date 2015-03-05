@@ -10,10 +10,9 @@
 #import <CoreLocation/CoreLocation.h>
 
 
-@interface TextFieldViewController : UIViewController<UITextFieldDelegate,CLLocationManagerDelegate>
+@interface TextFieldViewController : UIViewController<UITextFieldDelegate>
 {
-    CLLocationManager *locationManager ;
-
+    
 }
 
 

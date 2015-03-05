@@ -18,9 +18,11 @@
 @synthesize searchDetails;
 @synthesize resultTableView,resultArray;
 @synthesize textfieldString,passLoation;
+@synthesize passingLatitude,passingLongitude;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     
     UILabel *headerLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
     headerLabel.backgroundColor = [UIColor colorWithRed:238/255.0 green:238/255.0 blue:238/255.0 alpha:1.0];
@@ -30,6 +32,23 @@
     headerLabel.font = [UIFont fontWithName:@"HelveticaNeue-CondensedBold" size:20];
     [self.view addSubview:headerLabel];
 
+    /// Static for iOS simulator
+    passingLatitude = 12.971891;
+    passingLongitude = 77.641154;
+    
+    /// User Location
+    locationManager = [[CLLocationManager alloc] init];
+    locationManager.distanceFilter = kCLDistanceFilterNone; // whenever we move
+    locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
+    locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    locationManager.delegate = self;
+    
+    if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
+        [locationManager requestWhenInUseAuthorization];
+        
+    }
+    [locationManager startUpdatingLocation];
+    
     
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
     backButton.frame = CGRectMake(3,27, 32, 32);
@@ -38,17 +57,41 @@
     [self.view addSubview:backButton];
     
     resultArray = [[NSMutableArray alloc]initWithCapacity:0];
-    
     resultTableView = [[UITableView alloc]initWithFrame:CGRectMake(0, headerLabel.frame.origin.y+headerLabel.frame.size.height, self.view.frame.size.width, self.view.frame.size.height-64)];
     resultTableView.backgroundColor = [UIColor whiteColor];
     self.resultTableView.separatorColor = [UIColor clearColor];
-
     [self.view addSubview:resultTableView];
     
-    [self loadQuery];
+    UIActivityIndicatorView* indicatorView=[[UIActivityIndicatorView alloc]init];
+    indicatorView.frame=CGRectMake((self.resultTableView.frame.size.width- indicatorView.frame.size.width)/2, (self.resultTableView.frame.size.height-indicatorView.frame.size.height)/2, indicatorView.frame.size.width, indicatorView.frame.size.height);
+    indicatorView.activityIndicatorViewStyle=UIActivityIndicatorViewStyleGray;
+    indicatorView.tag = 100;
+    [indicatorView startAnimating];
+    [self.resultTableView addSubview:indicatorView];
+
+    
+   
     // Do any additional setup after loading the view.
 }
 
+#pragma mark - CLLocationManager  Delegates
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+{
+    CLLocation *newLocation = [locations lastObject];
+    passingLatitude = newLocation.coordinate.latitude;
+    passingLongitude = newLocation.coordinate.longitude;
+    [self loadQuery];
+    [locationManager stopUpdatingLocation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+     [self loadQuery];
+    UIAlertView *errorAlert = [[UIAlertView alloc]
+                               initWithTitle:@"Error" message:@"Failed to Get Your Location" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [errorAlert show];
+}
 
 #pragma mark - Twitter Feeds
 
@@ -56,16 +99,15 @@
 {
 
      ////  Search Query images tag with hashtag name
-    
     NSString *passTextFiled = [NSString stringWithFormat:@"#%@ filter:images",textfieldString];
+    NSString *locationString = [NSString stringWithFormat:@"%f,%f,3km",passingLatitude,passingLongitude];
     
     /// Twitter Search API
-    
     NSString *statusesShowEndpoint = @"https://api.twitter.com/1.1/search/tweets.json";
     
     // Parameters (hashtag , geocode , count , include_entities)
-    
-    NSDictionary *params = @{@"q" : passTextFiled,@"geocode" :passLoation,@"count":@"100",@"include_entities":@"true"};
+    //@"geocode" :locationString
+    NSDictionary *params = @{@"q" : passTextFiled,@"geocode" :locationString,@"count":@"50",@"include_entities":@"true"};
 
     NSError *clientError;
     NSURLRequest *request = [[[Twitter sharedInstance] APIClient]
@@ -109,18 +151,45 @@
                     }
                          if([resultArray count] != 0)
                          {
+                             for(UIView *subView in self.resultTableView.subviews)
+                             {
+                                 if(subView.tag == 100)
+                                 {
+                                     UIActivityIndicatorView *activityIndicatorView = (UIActivityIndicatorView *)subView;
+                                     [activityIndicatorView removeFromSuperview];
+
+                                 }
+                             }
                              resultTableView.delegate = self;
                              resultTableView.dataSource  =self;
                              [resultTableView reloadData];
                          }
                          else
                          {
+                             for(UIView *subView in self.resultTableView.subviews)
+                             {
+                                 if(subView.tag == 100)
+                                 {
+                                     UIActivityIndicatorView *activityIndicatorView = (UIActivityIndicatorView *)subView;
+                                     [activityIndicatorView removeFromSuperview];
+                                     
+                                 }
+                             }
                              UIAlertView* successAlert =[[UIAlertView alloc]initWithTitle:@"Alert" message:@"No results found" delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
                              [successAlert show];
                          }
                     }
                  else
                   {
+                      for(UIView *subView in self.resultTableView.subviews)
+                      {
+                          if(subView.tag == 100)
+                          {
+                              UIActivityIndicatorView *activityIndicatorView = (UIActivityIndicatorView *)subView;
+                              [activityIndicatorView removeFromSuperview];
+                              
+                          }
+                      }
                       UIAlertView* successAlert =[[UIAlertView alloc]initWithTitle:@"Alert" message:@"No results found" delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
                       [successAlert show];
 
@@ -128,7 +197,15 @@
              }
              else
              {
-                 
+                 for(UIView *subView in self.resultTableView.subviews)
+                 {
+                     if(subView.tag == 100)
+                     {
+                         UIActivityIndicatorView *activityIndicatorView = (UIActivityIndicatorView *)subView;
+                         [activityIndicatorView removeFromSuperview];
+                         
+                     }
+                 }
                  UIAlertView* errorAlert1=[[UIAlertView alloc]initWithTitle:@"Error" message:[NSString stringWithFormat:@"%@",connectionError] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
                  [errorAlert1 show];
                  

@@ -31,27 +31,7 @@
     NSString* userImageURL = [markArray objectAtIndex: 2];
 
     
-    /// Static for iOS simulator
-    
-        passingLatitude = 12.971891;
-        passingLongitude = 77.641154;
-    
-    
-    
-    /// User Location
-    
-    locationManager = [[CLLocationManager alloc] init];
-    locationManager.distanceFilter = kCLDistanceFilterNone; // whenever we move
-    locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
-    locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-    locationManager.delegate = self;
-    
-    if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
-        [locationManager requestWhenInUseAuthorization];
-    }
-    [locationManager startUpdatingLocation];
-
-    
+   
     
     UILabel *headerLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
     headerLabel.backgroundColor = [UIColor colorWithRed:238/255.0 green:238/255.0 blue:238/255.0 alpha:1.0];
@@ -157,14 +137,14 @@
 -(void)searchButtonAction
 {
     
-    NSString *locationString = [NSString stringWithFormat:@"%f,%f,3km",passingLatitude,passingLongitude];
+    //NSString *locationString = [NSString stringWithFormat:@"%f,%f,3km",passingLatitude,passingLongitude];
     UITextField *searchTextField = (UITextField*)[self.view viewWithTag:100];
     
     if([searchTextField.text length] != 0)
     {
         ListViewController *listVC = [[ListViewController alloc]init];
         listVC.textfieldString = searchTextField.text;
-        listVC.passLoation = locationString;
+        //listVC.passLoation = locationString;
         [self.navigationController pushViewController:listVC animated:YES];
     }
     else
@@ -175,16 +155,6 @@
 
 }
 
-#pragma mark - CLLocationManager  Delegates
-
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
-{
-    CLLocation *newLocation = [locations lastObject];
-    
-    passingLatitude = newLocation.coordinate.latitude;
-    passingLongitude = newLocation.coordinate.longitude;
-    [locationManager stopUpdatingLocation];
-}
 
 #pragma mark - TextField Delegates
 
