@@ -29,10 +29,10 @@
     NSString* userImageURL = [markArray objectAtIndex: 2];
 
     
-    /// Static for iphone simulator
+    /// Static for iOS simulator
     
-    passingLatitude = 13.024492;
-    passingLongitude = 80.215529;
+        passingLatitude = 12.971891;
+        passingLongitude = 77.641154;
     
     
     
@@ -181,9 +181,7 @@
     
     passingLatitude = newLocation.coordinate.latitude;
     passingLongitude = newLocation.coordinate.longitude;
-
     [locationManager stopUpdatingLocation];
-    
 }
 
 #pragma mark - TextField Delegates
