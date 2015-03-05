@@ -37,15 +37,11 @@
             
             [[[Twitter sharedInstance] APIClient] loadUserWithID:session.userID completion:^(TWTRUser *user, NSError *error)
             {
-                
                 if(user)
                 {
-                    
                     NSString *commonString = [NSString stringWithFormat:@"%@^%@^%@",user.name,user.screenName,user.profileImageURL];
 
-                        
                     // TextField ViewController
-                    
                     TextFieldViewController *textFieldVC = [[TextFieldViewController alloc]init];
                     textFieldVC.userDetails = commonString;
                     [self.navigationController pushViewController:textFieldVC animated:YES];

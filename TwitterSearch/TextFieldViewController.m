@@ -9,6 +9,8 @@
 #import "TextFieldViewController.h"
 #import "ListViewController.h"
 
+#define iPhone4 ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone && MAX([UIScreen mainScreen].bounds.size.height,[UIScreen mainScreen].bounds.size.width) == 480)
+
 @interface TextFieldViewController ()
 
 @end
@@ -198,7 +200,27 @@
         [self.view endEditing:YES]; // dismiss the keyboard
 }
 
+- (void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if(iPhone4)
+    {
+        [UIView beginAnimations:@"animate" context:nil];
+        [UIView setAnimationDuration:0.2f];
+        [UIView setAnimationBeginsFromCurrentState: NO];
+        self.view.frame = CGRectMake(0, -40, self.view.frame.size.width,self.view.frame.size.height);
+        [UIView commitAnimations];
+    }
+}
 
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    [UIView beginAnimations:@"animate" context:nil];
+    [UIView setAnimationDuration:0.2f];
+    [UIView setAnimationBeginsFromCurrentState: NO];
+    self.view.frame = CGRectMake(0, 0, self.view.frame.size.width,self.view.frame.size.height);
+    [UIView commitAnimations];
+
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
